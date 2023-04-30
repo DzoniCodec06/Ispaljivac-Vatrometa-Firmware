@@ -22,6 +22,8 @@ bool selectedScreen = false;
 
 int counter = 0;
 
+int value;
+
 const int SHORT_PRESS_TIME = 500; // 500 milliseconds
 int lastState = LOW;  // the previous state from the input pin
 int currentState;     // the current reading from the input pin
@@ -40,6 +42,8 @@ byte arrow[8] = {
 };
 
 void setup() {
+  Serial.begin(9600);
+  
   lcd.init();
   lcd.backlight();
   lcd.setCursor(3, 0);
@@ -56,13 +60,15 @@ void setup() {
   pinMode(CLK, INPUT);
   pinMode(DT, INPUT);
   pinMode(SW, INPUT_PULLUP);
-  
+
   lastCLKState = digitalRead(CLK);
 }
+
+
 void loop() {
   currentCLKState = digitalRead(CLK);
-  
-  if (currentCLKState != lastCLKState && currentCLKState == 1) {    
+
+  if (currentCLKState != lastCLKState && currentCLKState == 1) {
     DTState = digitalRead(DT);
     if (DTState != currentCLKState) { // CW
       if (!selectedScreen) {
@@ -71,40 +77,42 @@ void loop() {
       } else return;
     } else {                          // CCW
       if (!selectedScreen) {
-        if (screen > 1) screen--; 
+        if (screen > 1) screen--;
         checkScreen(screen);
       }
     }
-  } 
+  }
 
   SWState = digitalRead(SW);
-  
-  if(lastState == HIGH && SWState == LOW)        // button is pressed
+
+  if (lastState == HIGH && SWState == LOW)       // button is pressed
     pressedTime = millis();
-  else if(lastState == LOW && SWState == HIGH) { // button is released
+  else if (lastState == LOW && SWState == HIGH) { // button is released
     releasedTime = millis();
 
     long pressDuration = releasedTime - pressedTime;
 
-    if( pressDuration < SHORT_PRESS_TIME ) {
+    if ( pressDuration < SHORT_PRESS_TIME ) {
       selectScreen();
-      selectedScreen = true; 
+      selectedScreen = true;
+      value = analogRead(A0);
+      selectChannel(value);
     } else {
       lcd.clear();
       screen = 1;
       checkScreen(screen);
-      selectedScreen = false; 
+      selectedScreen = false;
     }
   }
 
   // save the the last state
   lastState = SWState;
   lastCLKState = currentCLKState;
-  
+
 }
 
 void checkScreen(int sc) {
-  switch(sc) {
+  switch (sc) {
     case 1:
       lcd.clear();
       lcd.setCursor(2, 0);
@@ -142,7 +150,7 @@ void checkScreen(int sc) {
       lcd.print("Node 4");
       break;
     default: screen = 4;
-  }  
+  }
 }
 
 void selectScreen() {
@@ -157,4 +165,20 @@ void selectScreen() {
   lcd.print("CH3");
   lcd.setCursor(12, 1);
   lcd.print("CH4");
+}
+
+void selectChannel(int value) {
+  if (value > 800 && value < 1000) {          //Ch4
+    Serial.println("CH4");
+    // buttonval = 4;
+  } else if (value > 750 && value < 800) {    //Ch3
+    Serial.println("CH3");
+    // buttonval = 3;
+  } else if (value > 650 && value < 750) {    //Ch2
+    Serial.println("CH2");
+    // buttonval = 2;
+  } else if (value > 480 && value < 650) {    //Ch1
+    Serial.println("CH1");
+    // buttonval = 1;
+  } else return;
 }
