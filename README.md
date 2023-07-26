@@ -1,2 +1,3 @@
-# LCD-Arduino-Menu
-Template for making menu's on LCD with Arduino and Rotary Encoder.
+# Ispaljivac-Vatrometa-Firmware
+
+This is Firmware Porgrams for Mainboard and Nodeboard.
