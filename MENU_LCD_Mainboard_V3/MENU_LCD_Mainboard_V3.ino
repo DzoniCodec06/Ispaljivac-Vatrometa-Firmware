@@ -3,6 +3,20 @@
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+//------- DECLARING RADIO -------\\
+
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+const int CE_pin = 7;
+const int CSN_pin = 8;
+
+RF24 radio(CE_pin, CSN_pin);
+
+// ADRESS
+const byte address[6] = "00001";
+
 //------- DECLARING ROTARY ENCODER -------\\
 
 const int CLK = 10;
@@ -35,6 +49,11 @@ const int max_screen = 4;
 
 int servo1_value;
 int servo2_value;
+
+String current_command;
+String last_command;
+
+char cmd[12];
 
 // CUSTOM ARROW CHARACTER
 byte arrowRight[8] = {
@@ -99,7 +118,7 @@ void channelScreen(int sc) {
       break;
   }
 
-  lcd.setCursor(15,0);
+  lcd.setCursor(15, 0);
   lcd.print(sc);
 
 }
@@ -125,13 +144,13 @@ void servoScreen(int sc) {
       break;
   }
 
-  lcd.setCursor(15,0);
+  lcd.setCursor(15, 0);
   lcd.print(sc);
 }
 
 void setServoValue(int val, int sc) {
   lcd.clear();
-  lcd.setCursor(0,0);
+  lcd.setCursor(0, 0);
   switch (sc) {
     case 1:
       lcd.print("Servo 1 angle:");
@@ -201,6 +220,11 @@ void setup() {
   lcd.clear();
   homeScreen(screen);
 
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
+
   pinMode(CLK, INPUT);
   pinMode(DT, INPUT);
   pinMode(SW, INPUT_PULLUP);
@@ -224,10 +248,10 @@ void loop() {
       else if (servo_angle_screen) {
         if (screen == 1) {
           if (servo1_value < 180) servo1_value += 5;
-          setServoValue(servo1_value, screen); 
+          setServoValue(servo1_value, screen);
         } else if (screen == 2) {
           if (servo2_value < 180) servo2_value += 5;
-          setServoValue(servo2_value, screen); 
+          setServoValue(servo2_value, screen);
         }
       }
     } else {                          // CCW
@@ -238,10 +262,10 @@ void loop() {
       else if (servo_angle_screen) {
         if (screen == 1) {
           if (servo1_value > 0) servo1_value -= 5;
-          setServoValue(servo1_value, screen); 
+          setServoValue(servo1_value, screen);
         } else if (screen == 2) {
           if (servo2_value > 0) servo2_value -= 5;
-          setServoValue(servo2_value, screen); 
+          setServoValue(servo2_value, screen);
         }
       }
     }
@@ -257,22 +281,53 @@ void loop() {
 
     if ( pressDuration < SHORT_PRESS_TIME ) {
       if (home_screen) {
+        current_command += "N" + String(screen);
         home_screen = false;
         channel_screen = true;
         screen = 1;
         channelScreen(screen);
       } else if (!home_screen && channel_screen) {
         channel_screen = false;
+        current_command += "CH" + String(screen);
         servo_screen = true;
         screen = 1;
         servoScreen(screen);
       } else if (!channel_screen && servo_screen) {
         servo_screen = false;
+        current_command += "S" + String(screen);
         servo_angle_screen = true;
         if (screen == 1) setServoValue(servo1_value, screen);
         else if (screen == 2) setServoValue(servo2_value, screen);
       }
     } else {
+      if (current_command.length() == 7 && screen == 1) {
+        current_command += "A" + String(servo1_value);
+        last_command = current_command;
+        current_command = "";
+      }
+      else if (current_command.length() == 7 && screen == 2) {
+        current_command += "A" + String(servo2_value);
+        last_command = current_command;
+        current_command = "";
+      }
+      else current_command = "";
+      //Serial.println(last_command);
+      
+      /*
+      for (int i = 0; i < last_command.length(); i++) {
+        cmd[0] = last_command.charAt(i);
+        radio.write(cmd, sizeof(cmd));
+      }*/
+      /*
+      for (int i = 0; i < last_command.length(); i++) {
+        if (i < 8) cmd[i] = last_command[i];
+        else radio_angle = last_command[i];
+      }*/
+
+      last_command.toCharArray(cmd, 12);
+
+      radio.write(&cmd, sizeof(cmd));
+      
       home_screen = true;
       channel_screen = false;
       servo_screen = false;
