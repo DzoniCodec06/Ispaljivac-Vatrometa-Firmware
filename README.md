@@ -1,4 +1,4 @@
-![Frame 2](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/d4d31bcf-b6d4-478c-b21e-1a19530a2ed7)
+![Frame 2](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/0af699ed-818e-4db0-b5b3-66d1f6dd932c)
 
 <!-- ![Sika 4](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/98958c96-a0bd-4db3-94ba-98790aa37979) -->
 
