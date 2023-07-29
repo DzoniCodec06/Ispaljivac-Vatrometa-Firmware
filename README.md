@@ -1,4 +1,6 @@
-![Sika 4](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/98958c96-a0bd-4db3-94ba-98790aa37979)
+![Frame 2](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/d4d31bcf-b6d4-478c-b21e-1a19530a2ed7)
+
+<!-- ![Sika 4](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/98958c96-a0bd-4db3-94ba-98790aa37979) -->
 
 <!-- Ispaljivac-Vatrometa-Firmware  -->
 
@@ -7,6 +9,12 @@
 ## Node Select Screen
 
 ![LCD 1](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/d82392b6-4a1d-4bf8-88cf-29c0b4b4ba8f)
+
+With **Rotary Encoder** here we can select what node we want.
+
+There are **4 Nodes**. 
+
+**Right arrow** points what Node we're selecting.
 
 ## Channel Select Screen
 
