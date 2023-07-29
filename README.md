@@ -1,4 +1,5 @@
 # Ispaljivac-Vatrometa-Firmware
-![Frame 1](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/a041c84e-474d-4844-8323-d87ceb48f287)
+
+![Sika 2](https://github.com/DzoniCodec06/Ispaljivac-Vatrometa-Firmware/assets/60019990/bbe1aa64-d8c7-4f5b-bcf0-f57852d80762)
 
 This is Firmware Porgrams for Mainboard and Nodeboard.
