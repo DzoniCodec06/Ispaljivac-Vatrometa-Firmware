@@ -78,6 +78,13 @@ byte arrowLeft[] = {
   B00000
 };
 
+//------- DECLARING BUTTONS FIRE/RAPID -------\\
+
+const int fire_button = 6;
+int fire_state;
+
+bool fire = false;
+
 //------- DECLARING SCREEN STATES -------\\
 
 bool home_screen = true;
@@ -205,8 +212,57 @@ void homeScreen(int sc) {
   }
 }
 
+void fireScreen(int sc) {
+  lcd.clear();
+  lcd.setCursor(1, 0);
+  lcd.print("Ready to fire?");
+
+  lcd.setCursor(3, 1);
+  lcd.print("Yes");
+  lcd.setCursor(9, 1);
+  lcd.print("No");
+  
+  switch (sc) {
+    case 1:
+      lcd.setCursor(2, 1);
+      lcd.write(byte(1));
+      lcd.setCursor(6, 1);
+      lcd.write(byte(0));
+      break;
+    case 2:
+      lcd.setCursor(8, 1);
+      lcd.write(byte(1));
+      lcd.setCursor(11, 1);
+      lcd.write(byte(0));
+      break;
+    default:
+      sc = 2;
+  }
+}
+
+void fireingScreen() {
+  lcd.clear();
+  lcd.setCursor(4,0);
+  lcd.print("Firing!!!");
+  for (int i = 0; i <= 15; i++) {
+    lcd.setCursor(i, 1);
+    lcd.print(".");
+    delay(150);
+  }
+  delay(1000);
+  lcd.clear();
+  lcd.setCursor(5,0);
+  lcd.print("Fired");
+  lcd.setCursor(2,1);
+  lcd.print("Successfully");
+  delay(2000);
+  homeScreen(screen);
+}
+
 void setup() {
   Serial.begin(9600);
+
+  pinMode(fire_button, INPUT_PULLUP);
 
   lcd.init();
   lcd.backlight();
@@ -214,8 +270,10 @@ void setup() {
   lcd.createChar(0, arrowLeft);
   lcd.createChar(1, arrowRight);
 
-  lcd.setCursor(0, 0);
-  lcd.print("Firework");
+  lcd.setCursor(3, 0);
+  lcd.print("Fireworks");
+  lcd.setCursor(4, 1);
+  lcd.print("Igniter");
   delay(2000);
   lcd.clear();
   homeScreen(screen);
@@ -235,10 +293,19 @@ void setup() {
 void loop() {
   currentCLKState = digitalRead(CLK);
 
+  fire_state = digitalRead(fire_button);
+
+  if (fire_state == LOW && !fire && home_screen) {
+    fire = true;
+    home_screen = false;
+    fireScreen(screen);
+    delay(250);
+  }
+
   if (currentCLKState != lastCLKState && currentCLKState == 1) {
     DTState = digitalRead(DT);
     if (DTState != currentCLKState) { // CW
-      if (screen < max_screen && !servo_screen && !servo_angle_screen) screen++;
+      if (screen < max_screen && !servo_screen && !servo_angle_screen && !fire) screen++;
       if (home_screen) homeScreen(screen);
       else if (channel_screen) channelScreen(screen);
       else if (servo_screen) {
@@ -254,6 +321,11 @@ void loop() {
           setServoValue(servo2_value, screen);
         }
       }
+      else if (fire) {
+        if (screen < 2) screen++;
+        fireScreen(screen);
+        Serial.println(screen);
+      }
     } else {                          // CCW
       if (screen > 1 && !servo_angle_screen) screen--;
       if (home_screen)  homeScreen(screen);
@@ -267,6 +339,10 @@ void loop() {
           if (servo2_value > 0) servo2_value -= 5;
           setServoValue(servo2_value, screen);
         }
+      }
+      else if (fire) {
+        fireScreen(screen);
+        Serial.println(screen);
       }
     }
   }
@@ -298,6 +374,18 @@ void loop() {
         servo_angle_screen = true;
         if (screen == 1) setServoValue(servo1_value, screen);
         else if (screen == 2) setServoValue(servo2_value, screen);
+      } else if (fire && !home_screen) {
+        if (screen == 1) {
+          Serial.println("Yes");
+          fireingScreen();
+          fire = false;
+          home_screen = true;
+        } else if (screen == 2) {
+          Serial.println("No");
+          fire = false;
+          home_screen = true;
+          homeScreen(screen);
+        }
       }
     } else {
       if (current_command.length() == 7 && screen == 1) {
